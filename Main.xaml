@@ -10,6 +10,7 @@
  xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib"
  xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
  xmlns:sd="clr-namespace:System.Data;assembly=System.Data"
+ xmlns:sd1="clr-namespace:System.Diagnostics;assembly=System"
  xmlns:ui="http://schemas.uipath.com/workflow/activities"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <TextExpression.NamespacesForImplementation>
@@ -237,6 +238,7 @@
                                 <OutArgument x:TypeArguments="x:String" x:Key="out_TransactionField2">[TransactionField2]</OutArgument>
                                 <OutArgument x:TypeArguments="x:String" x:Key="out_TransactionID">[TransactionID]</OutArgument>
                                 <InArgument x:TypeArguments="sd:DataTable" x:Key="in_TransactionData">[TransactionData]</InArgument>
+                                <OutArgument x:TypeArguments="sd1:Stopwatch" x:Key="out_TransactionExecutionWatch">[TransactionExecutionWatch]</OutArgument>
                               </ui:InvokeWorkflowFile.Arguments>
                             </ui:InvokeWorkflowFile>
                           </TryCatch.Try>
@@ -340,6 +342,7 @@
                                       <InArgument x:TypeArguments="x:String" x:Key="in_TransactionID">[TransactionID]</InArgument>
                                       <InArgument x:TypeArguments="sd:DataTable" x:Key="in_StatusFileStructure">[StatusFileStructure]</InArgument>
                                       <InArgument x:TypeArguments="x:String" x:Key="in_StatusFileName">[StatusFileName]</InArgument>
+                                      <InArgument x:TypeArguments="sd1:Stopwatch" x:Key="in_TransactionExecutionWatch">[TransactionExecutionWatch]</InArgument>
                                     </ui:InvokeWorkflowFile.Arguments>
                                   </ui:InvokeWorkflowFile>
                                 </TryCatch.Try>
@@ -453,8 +456,9 @@
       <Variable x:TypeArguments="sd:DataTable" Name="TransactionData" />
       <Variable x:TypeArguments="sd:DataTable" Name="StatusFileStructure" />
       <Variable x:TypeArguments="x:String" Name="StatusFileName" />
+      <Variable x:TypeArguments="sd1:Stopwatch" sap2010:Annotation.AnnotationText="Used to measure the execution time for a transaction.&#xD;&#xA;The stopwatch is started after the transaction data is fetched, inside the GetTransactionData workflow and it is stopped in the SetTransactionStatus workflow." Name="TransactionExecutionWatch" />
     </StateMachine.Variables>
-    <sads:DebugSymbol.Symbol>d0ZEOlxSUEEgUHJvamVjdHNcX015R29Db21wb25lbnRzXFJlRnJhbWV3b3JrIGZvciBUYWJ1bGFyIERhdGFcTWFpbi54YW1skQFNA8oDEgIBAb8DM78DNgMB2QHBAzPBAzYDAdgBzwEPpAMXAwGjAY8CF+0CHwIBafYCF5wDHwIBVU8HtQMPAgEC0QETigIeAwGuAfICK/ICSgMBrAHwAhfwAuEBAwGoAaEDK6EDRwMBpwGfAxefA7oBAwGlAZECG+YCJgIBcOkClgHpArMBAgFt6gKfAeoCxgECAWzrAooC6wLJAgIBa/gCG5oDJgIBV1ELygEWAgESqQMjqQM7AgEPpwMPpwOdAQIBDrIDI7IDPgIBDK0DD7ADGgIBBNUBFdUBiwEDAdUB1gEViQIaAwGvAfAChQHwAt4BAwGpAZ8DhQGfA7cBAwGmAZMCH6UCKgMBmAHIAh/kAioCAXutAiO0AiwCAXa8AiPDAiwCAXH5Ah2UAygCAV6VAx2ZAyICAVhTD7cBGgIBGL8BE8YBHAIBE64DEa4D+AECAQivAxGvA5sBAgEF1QF61QGIAQMB1gHWASPWATEDAbAB2AEZ4gEkAwHOAeUBGYcCJAMBsgGXAiGeAioDAZ8BnwIhpAI5AwGZAcoCI9gCOwMBgAHgAifgAocCAgF8sgJesgJpAgF5rwJfrwJ2AgF3wQJRwQJcAgF0vgJSvgJfAgFy+wIhgQMsAgFmiQMlkAMwAgFflQPyApUDjwMCAVmXAyGXA4wBAgFbVBFbGgIBUVwRchYCAUJzEXcpAgE+eBG2ARYCARnEAUHEAUwCARbBAULBAU8CARSuA3+uA/UBAgEJrwOAAa8DmAECAQbZARvZAakBAwHTAdoBG+EBJAMBzwHnAR3xATUDAb4B+QEhgwIsAwGzAZwCXJwCZQMBogGZAl2ZAnQDAaABogJ4ogKAAQMBnQGhAmmhAnoDAZsBnwLbAZ8C6QEDAZoB1gJo1gJ4AwGWAc0CaM0CdQMBlAHOAn/OApYBAwGSAdMCa9MCfgMBkAHVAnHVAoYBAwGOAdICa9ICfgMBjAHQAmfQAnQDAYoBzAJ6zAKCAQMBiAHPAmvPAnwDAYYB0QJt0QKAAQMBhAHUAmfUAnYDAYIBygLgAcoChQIDAYEB4AKWAeAChAICAX38AiOAAzsCAWeKAyeKA4sCAgFiiwMnjwM/AgFglwNQlwNfAgFcWT9ZSAIBVFZAVk0CAVJcH1w0AgFDXhVwIAIBRXVodXACAUBzzQFz8QECAT94H3g9AgEaehW0ASACARvZAY4B2QGmAQMB1AHfAUjfAVEDAdIB3AFJ3AFaAwHQAe0BZ+0BegMBzAHsAWfsAXoDAcoB7gFj7gFyAwHIAesBZ+sBeAMBxgHpAWTpAXcDAcQB7wFn7wF4AwHCAeoBdOoBfAMBwAHnAdgB5wH7AQMBvwH6ASP6Ab4CAwG4AfsBI4ICLAMBtAH8At8B/AKEAgIBaIoDlQGKA4gCAgFjiwPfAYsDgAICAWFfF2UvAgFLZhdqLwIBSWsXbykCAUZ7F6oBIwIBKKsBF6sB6QECASasARezAS8CARz6AZIB+gG7AgMBuQGAAlCAAlkDAbcB/QFR/QFiAwG1AWNwY3gCAU9fzwFf7wECAU5iXGJ3AgFNYVhhaAIBTGbQAWbxAQIBSm1jbZABAgFHgQEdiAEmAgE6igGMAYoBogECATmNASWcAUACATCgASOgAa8CAgEpqwGbAasB5gECASexAV6xAW4CASSvAW6vAXYCASKsAdABrAHxAQIBIbABZ7ABfAIBH64BZK4BewIBHYYBT4YBjAECAT2DAVCDAWQCATuNAZkCjQHHAgIBN5MBK5kBPwIBMaABkgGgAcQBAgEuoAE9oAFQAgEsoAHOAaAB/AECASqTAVqTAW0CATWWATGWAWACATSTAcQBkwH3AQIBMg==</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>d0ZEOlxSUEEgUHJvamVjdHNcX015R29Db21wb25lbnRzXFJlRnJhbWV3b3JrLWZvci1UYWJ1bGFyLURhdGFcTWFpbi54YW1skwFOA84DEgIBAcIDM8IDNgMB3QHEAzPEAzYDAdwB0AEPpwMXAwGlAZECF/ACHwIBafkCF58DHwIBVVAHuAMPAgEC0gETjAIeAwGwAfUCK/UCSgMBrgHzAhfzAuEBAwGqAaQDK6QDRwMBqQGiAxeiA7oBAwGnAZMCG+kCJgIBcOwClgHsArMBAgFt7QKfAe0CxgECAWzuAooC7gLJAgIBa/sCG50DJgIBV1ILywEWAgESrAMjrAM7AgEPqgMPqgOdAQIBDrUDI7UDPgIBDLADD7MDGgIBBNYBFdYBiwEDAdkB1wEViwIaAwGxAfMChQHzAt4BAwGrAaIDhQGiA7cBAwGoAZUCH6cCKgMBmgHKAh/nAioCAXuvAiO2AiwCAXa+AiPFAiwCAXH8Ah2XAygCAV6YAx2cAyICAVhUD7gBGgIBGMABE8cBHAIBE7EDEbED+AECAQiyAxGyA5sBAgEF1gF61gGIAQMB2gHXASPXATEDAbIB2QEZ4wEkAwHSAeYBGYkCJAMBtAGZAiGgAioDAaEBoQIhpgI5AwGbAcwCI9sCOwMBgAHjAifjAocCAgF8tAJetAJpAgF5sQJfsQJ2AgF3wwJRwwJcAgF0wAJSwAJfAgFy/gIhhAMsAgFmjAMlkwMwAgFfmAPyApgDjwMCAVmaAyGaA4wBAgFbVRFcGgIBUV0RcxYCAUJ0EXgpAgE+eRG3ARYCARnFAUHFAUwCARbCAULCAU8CARSxA3+xA/UBAgEJsgOAAbIDmAECAQbaARvaAakBAwHXAdsBG+IBJAMB0wHoAR3zATUDAcAB+wEhhQIsAwG1AZ4CXJ4CZQMBpAGbAl2bAnQDAaIBpAJ4pAKAAQMBnwGjAmmjAnoDAZ0BoQLbAaEC6QEDAZwB2AJo2AJ4AwGYAc8CaM8CdQMBlgHQAn/QApYBAwGUAdUCa9UCfgMBkgHXAnHXAoYBAwGQAdQCa9QCfgMBjgHSAmfSAnQDAYwBzgJ6zgKCAQMBigHRAmvRAnwDAYgB0wJt0wKAAQMBhgHZAnjZApMBAwGEAdYCZ9YCdgMBggHMAuABzAKFAgMBgQHjApYB4wKEAgIBff8CI4MDOwIBZ40DJ40DiwICAWKOAyeSAz8CAWCaA1CaA18CAVxaP1pIAgFUV0BXTQIBUl0fXTQCAUNfFXEgAgFFdmh2cAIBQHTNAXTxAQIBP3kfeT0CARp7FbUBIAIBG9oBjgHaAaYBAwHYAeABSOABUQMB1gHdAUndAVoDAdQB7gFn7gF6AwHQAe0BZ+0BegMBzgHvAWPvAXIDAcwB7AFn7AF4AwHKAeoBZOoBdwMByAHxAXTxAY8BAwHGAfABZ/ABeAMBxAHrAXTrAXwDAcIB6AHYAegB+wEDAcEB/AEj/AG+AgMBugH9ASOEAiwDAbYB/wLfAf8ChAICAWiNA5UBjQOIAgIBY44D3wGOA4ACAgFhYBdmLwIBS2cXay8CAUlsF3ApAgFGfBerASMCASisAResAekBAgEmrQEXtAEvAgEc/AGSAfwBuwIDAbsBggJQggJZAwG5Af8BUf8BYgMBtwFkcGR4AgFPYM8BYO8BAgFOY1xjdwIBTWJYYmgCAUxn0AFn8QECAUpuY26QAQIBR4IBHYkBJgIBOosBjAGLAaIBAgE5jgElnQFAAgEwoQEjoQGvAgIBKawBmwGsAeYBAgEnsgFesgFuAgEksAFusAF2AgEirQHQAa0B8QECASGxAWexAXwCAR+vAWSvAXsCAR2HAU+HAYwBAgE9hAFQhAFkAgE7jgGZAo4BxwICATeUASuaAT8CATGhAZIBoQHEAQIBLqEBPaEBUAIBLKEBzgGhAfwBAgEqlAFalAFtAgE1lwExlwFgAgE0lAHEAZQB9wECATI=</sads:DebugSymbol.Symbol>
   </StateMachine>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
@@ -645,7 +649,7 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="Assign_3" sap:VirtualizedContainerService.HintSize="242,60" />
-      <sap2010:ViewStateData Id="Catch`1_1" sap:VirtualizedContainerService.HintSize="404,21">
+      <sap2010:ViewStateData Id="Catch`1_1" sap:VirtualizedContainerService.HintSize="422,21">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">False</x:Boolean>
@@ -654,7 +658,7 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="Assign_4" sap:VirtualizedContainerService.HintSize="242,60" />
-      <sap2010:ViewStateData Id="Catch`1_2" sap:VirtualizedContainerService.HintSize="404,21">
+      <sap2010:ViewStateData Id="Catch`1_2" sap:VirtualizedContainerService.HintSize="422,21">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">False</x:Boolean>
@@ -673,7 +677,7 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="TryCatch_6" sap:VirtualizedContainerService.HintSize="418,314" />
-      <sap2010:ViewStateData Id="TryCatch_1" sap:VirtualizedContainerService.HintSize="418,560">
+      <sap2010:ViewStateData Id="TryCatch_1" sap:VirtualizedContainerService.HintSize="436,563">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
@@ -712,7 +716,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="State_3" sap:VirtualizedContainerService.HintSize="444,1018">
+      <sap2010:ViewStateData Id="State_3" sap:VirtualizedContainerService.HintSize="211,142">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <av:Point x:Key="ShapeLocation">285,380</av:Point>
@@ -866,7 +870,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Main2_1" sap:VirtualizedContainerService.HintSize="826,906" />
+      <sap2010:ViewStateData Id="Main2_1" sap:VirtualizedContainerService.HintSize="826,866" />
     </sap2010:ViewStateManager>
   </sap2010:WorkflowViewState.ViewStateManager>
 </Activity>

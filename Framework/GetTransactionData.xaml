@@ -8,6 +8,7 @@
  xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib"
  xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
  xmlns:sd="clr-namespace:System.Data;assembly=System.Data"
+ xmlns:sd1="clr-namespace:System.Diagnostics;assembly=System"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_TransactionNumber" Type="InArgument(x:Int32)" />
@@ -17,6 +18,7 @@
     <x:Property Name="out_TransactionField2" Type="OutArgument(x:String)" />
     <x:Property Name="out_TransactionID" Type="OutArgument(x:String)" />
     <x:Property Name="in_TransactionData" Type="InArgument(sd:DataTable)" />
+    <x:Property Name="out_TransactionExecutionWatch" Type="OutArgument(sd1:Stopwatch)" />
   </x:Members>
   <mva:VisualBasic.Settings>
     <x:Null />
@@ -76,10 +78,11 @@
       <AssemblyReference>System.ValueTuple</AssemblyReference>
       <AssemblyReference>UiPath.Studio.Plugin.Workflow</AssemblyReference>
       <AssemblyReference>System.Collections.Immutable</AssemblyReference>
+      <AssemblyReference>System.Configuration.Install</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
   <Sequence sap2010:Annotation.AnnotationText="Description: Get one row from TransactionData data table. If no new data, set out_TransactionItem to Nothing. &#xA;&#xA;For a linear process (not repetitive), set out_TransactionItem only for in_TransactionNumber 1 - first and only transaction. &#xA;&#xA;If the process is repeatable, assign a new out_TransactionItem by using the in_TransactionNumber to index in_TransactionData. Be aware that, at the end of the in_TransactionData collection, it is your responsibility to set out_TransactionItem to Nothing, thus ending the process." DisplayName="GetTransactionData" sap2010:WorkflowViewState.IdRef="Sequence_1">
-    <If Condition="[in_TransactionNumber &lt;= in_TransactionData.Rows.Count]" DisplayName="If still have rows to process" sap2010:WorkflowViewState.IdRef="If_2">
+    <If Condition="[in_TransactionNumber &lt;= in_TransactionData.Rows.Count]" DisplayName="If - Rows to process" sap2010:WorkflowViewState.IdRef="If_2">
       <If.Then>
         <Assign DisplayName="Assign Transaction Item" sap2010:WorkflowViewState.IdRef="Assign_5">
           <Assign.To>
@@ -101,6 +104,15 @@
         </Assign>
       </If.Else>
     </If>
+    <Assign sap2010:Annotation.AnnotationText="Initializes a new Stopwatch instance, sets the elapsed time property to zero, and starts measuring elapsed time." DisplayName="Assign TransactionExecutionWathc">
+      <Assign.To>
+        <OutArgument x:TypeArguments="sd1:Stopwatch">[out_TransactionExecutionWatch]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="sd1:Stopwatch">[System.Diagnostics.Stopwatch.StartNew]</InArgument>
+      </Assign.Value>
+      <sap2010:WorkflowViewState.IdRef>Assign_10</sap2010:WorkflowViewState.IdRef>
+    </Assign>
     <If Condition="[out_TransactionItem isNot Nothing]" DisplayName="If a new Item is fetched Grab it's significant data for logging" sap2010:WorkflowViewState.IdRef="If_1">
       <If.Then>
         <Sequence sap2010:Annotation.AnnotationText="Write data to the added fields that identify the Transaction" DisplayName="Write Transaction info in Logging Fields" sap2010:WorkflowViewState.IdRef="Sequence_2">
@@ -173,13 +185,20 @@
         </Sequence>
       </If.Then>
     </If>
-    <sads:DebugSymbol.Symbol>d19DOlxVc2Vyc1xTaWx2aXVcRG9jdW1lbnRzXFVpUGF0aFxSZUZyYW1ld29yayBmb3IgVGFidWxhciBEYXRhXEZyYW1ld29ya1xHZXRUcmFuc2FjdGlvbkRhdGEueGFtbCRRA7EBDgIBAVIFZwoCASZoBa8BCgIBAlITUk8CASdUCVsSAgEsXgllEgIBKGgTaDgCAQNqCa0BFAIBBFk2WWQCAS9WN1ZMAgEtYzZjPwIBK2A3YEwCASlrC4ABEAIBG4EBC5YBEAIBEJcBC6wBEAIBBWsZa20CARxtD3QYAgEidw9+GAIBHoEBGYEBZgIBEYMBD4oBGAIBF40BD5QBGAIBE5cBGZcBZgIBBpkBD6ABGAIBDKMBD6oBGAIBCHI6coEBAgElbztvTgIBI3w6fEgCASF5O3lOAgEfiAE6iAF6AgEahQE7hQFSAgEYkgE6kgFIAgEWjwE7jwFSAgEUngE6ngF6AgEPmwE7mwFSAgENqAE6qAFIAgELpQE7pQFSAgEJ</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>d15EOlxSUEEgUHJvamVjdHNcX015R29Db21wb25lbnRzXFJlRnJhbWV3b3JrLWZvci1UYWJ1bGFyLURhdGFcRnJhbWV3b3JrXEdldFRyYW5zYWN0aW9uRGF0YS54YW1sJ1QDvQEOAgEBVQVqCgIBKmsFcw4CASZ0BbsBCgIBAlUTVU8CAStXCV4SAgEwYQloEgIBLHA1cFwCASltNm1VAgEndBN0OAIBA3YJuQEUAgEEXDZcZAIBM1k3WUwCATFmNmY/AgEvYzdjTAIBLXcLjAEQAgEbjQELogEQAgEQowELuAEQAgEFdxl3bQIBHHkPgAEYAgEigwEPigEYAgEejQEZjQFmAgERjwEPlgEYAgEXmQEPoAEYAgETowEZowFmAgEGpQEPrAEYAgEMrwEPtgEYAgEIfjp+gQECASV7O3tOAgEjiAE6iAFIAgEhhQE7hQFOAgEflAE6lAF6AgEakQE7kQFSAgEYngE6ngFIAgEWmwE7mwFSAgEUqgE6qgF6AgEPpwE7pwFSAgENtAE6tAFIAgELsQE7sQFSAgEJ</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
       <sap2010:ViewStateData Id="Assign_5" sap:VirtualizedContainerService.HintSize="242,60" />
       <sap2010:ViewStateData Id="Assign_6" sap:VirtualizedContainerService.HintSize="242,60" />
       <sap2010:ViewStateData Id="If_2" sap:VirtualizedContainerService.HintSize="656,208" />
+      <sap2010:ViewStateData Id="Assign_10" sap:VirtualizedContainerService.HintSize="656,117">
+        <sap:WorkflowViewStateService.ViewState>
+          <scg:Dictionary x:TypeArguments="x:String, x:Object">
+            <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+          </scg:Dictionary>
+        </sap:WorkflowViewStateService.ViewState>
+      </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="Assign_7" sap:VirtualizedContainerService.HintSize="242,60" />
       <sap2010:ViewStateData Id="Assign_1" sap:VirtualizedContainerService.HintSize="242,60" />
       <sap2010:ViewStateData Id="If_3" sap:VirtualizedContainerService.HintSize="509,208" />
@@ -198,7 +217,7 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="If_1" sap:VirtualizedContainerService.HintSize="656,1003" />
-      <sap2010:ViewStateData Id="Sequence_1" sap:VirtualizedContainerService.HintSize="678,1492">
+      <sap2010:ViewStateData Id="Sequence_1" sap:VirtualizedContainerService.HintSize="678,1649">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
@@ -206,7 +225,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="GetTransactionData_1" sap:VirtualizedContainerService.HintSize="718,1612" />
+      <sap2010:ViewStateData Id="GetTransactionData_1" sap:VirtualizedContainerService.HintSize="718,1729" />
     </sap2010:ViewStateManager>
   </sap2010:WorkflowViewState.ViewStateManager>
 </Activity>
