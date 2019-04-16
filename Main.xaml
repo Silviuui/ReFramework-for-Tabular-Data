@@ -169,7 +169,7 @@
                         <x:Reference>__ReferenceID2</x:Reference>
                         <x:Reference>__ReferenceID3</x:Reference>
                       </Flowchart>
-                      <ui:LogMessage DisplayName="Log Message -  Transactions Count" sap2010:WorkflowViewState.IdRef="LogMessage_27" Level="Info" Message="[&quot;Transactions number: &quot; + TransactionData.Rows.Count.ToString]" />
+                      <ui:LogMessage DisplayName="Log Message -  Transactions Count" sap2010:WorkflowViewState.IdRef="LogMessage_27" Level="Info" Message="[&quot;Total number of transactions: &quot; + TransactionData.Rows.Count.ToString]" />
                       <ui:InvokeWorkflowFile ContinueOnError="{x:Null}" DisplayName="Invoke CreateStatusFile workflow" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_19" UnSafe="False" WorkflowFileName="Framework\DefineStatusFile.xaml">
                         <ui:InvokeWorkflowFile.Arguments>
                           <InArgument x:TypeArguments="sd:DataTable" x:Key="in_InputDataStructure">[TransactionData.Clone]</InArgument>
@@ -870,7 +870,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Main2_1" sap:VirtualizedContainerService.HintSize="826,866" />
+      <sap2010:ViewStateData Id="Main2_1" sap:VirtualizedContainerService.HintSize="826,906" />
     </sap2010:ViewStateManager>
   </sap2010:WorkflowViewState.ViewStateManager>
 </Activity>
